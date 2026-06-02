@@ -1,27 +1,32 @@
 import "@/styles/globals.css";
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
 
 import { ClerkProvider } from '@clerk/nextjs'
 import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Inter } from "next/font/google";
+import { Toaster } from "sonner";
+
 
 export const metadata: Metadata = {
   title: "CodeAtlas",
   description: "AI powered",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: {
+    icon: "/chip1.svg",
+  },
 };
 
-const geist = Geist({
+
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-geist-sans",
 });
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={geist.variable}>
+     <ClerkProvider>
+    <html lang="en" suppressHydrationWarning className={inter.className}>
       <body>
         <ThemeProvider
             attribute="class"
@@ -29,13 +34,14 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-          <ClerkProvider>
+         
         <TRPCReactProvider>
         {children}
         </TRPCReactProvider>
-        </ClerkProvider>
+        <Toaster theme="dark"/>
         </ThemeProvider>
       </body>
     </html>
+    </ClerkProvider>
   );
 }
