@@ -24,6 +24,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
+import useProject from "@/hooks/use-projects";
 
 const items = [
   {
@@ -48,16 +49,10 @@ const items = [
   },
 ];
 
-const projects = [
-  "AI Meeting Assistant",
-  "Customer Support Bot",
-  "Sales Dashboard",
-  "Research Notes",
-];
-
 const AppSideBar = () => {
   const pathname = usePathname();
   const { open } = useSidebar();
+  const { projects, projectId, setProjectId } = useProject();
 
   return (
     <Sidebar collapsible="icon" variant="floating">
@@ -104,17 +99,35 @@ const AppSideBar = () => {
 
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1.5">
-              {projects.map((project) => (
-                <SidebarMenuItem key={project}>
-                  <SidebarMenuButton>
-                    <div className="flex size-5 items-center justify-center rounded-md bg-cyan-500/20 text-[10px] font-semibold text-cyan-400">
-                      {project.charAt(0).toUpperCase()}
-                    </div>
+              {projects?.map((project) => {
+                const isSelected = project.id === projectId;
 
-                    {open && <span>{project}</span>}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                return (
+                  <SidebarMenuItem key={project.id}>
+                    <SidebarMenuButton
+                      onClick={() => setProjectId(project.id)}
+                      className={cn(
+                        "transition-colors",
+                        isSelected &&
+                          "bg-gray-500/15 font-medium text-white hover:bg-gray-500/20",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "flex size-5 items-center justify-center rounded-md text-[10px] font-semibold",
+                          isSelected
+                            ? "bg-cyan-500/50 text-white"
+                            : "bg-cyan-500/20 text-cyan-400",
+                        )}
+                      >
+                        {project.name.charAt(0).toUpperCase()}
+                      </div>
+
+                      {open && <span>{project.name}</span>}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
               <SidebarMenuItem>
                 <Link href="/create">
                   <SidebarMenuButton className="hover:border-gray-20 border border-dashed border-gray-500/15">
