@@ -22,7 +22,9 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.4.1",
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.4.0",
+    "@octokit/rest": "^22.0.1",
     "@prisma/client": "^6.6.0",
     "@t3-oss/env-nextjs": "^0.12.0",
     "@tanstack/react-query": "^5.69.0",
