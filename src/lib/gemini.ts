@@ -6,7 +6,7 @@ const model = genAI.getGenerativeModel({
     model: "gemini-3.5-flash",
 });
 
-export const summariseCommit = async (diff: string) => {
+export const aiSummariseCommit = async (diff: string) => {
     
     const prompt = `
                     You are an expert software engineer reviewing a git diff.
