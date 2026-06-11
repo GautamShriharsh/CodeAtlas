@@ -6,6 +6,7 @@ import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
 import { ExternalLinkIcon } from "lucide-react";
 import { FiGithub } from "react-icons/fi";
+import CommitLog from "./commit-log";
 
 function Dashboard() {
   const { user } = useUser();
@@ -53,7 +54,7 @@ function Dashboard() {
       </div>
 
       {/* Commit Log Full Width */}
-      <div className="rounded-lg  p-4">CommitLog</div>
+      <div className="rounded-lg  p-4"><CommitLog /></div>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import {useLocalStorage} from 'usehooks-ts'
 
 const useProject = () => {
   
-const {data: projects} = api.project.getProject.useQuery() 
+const {data: projects} = api.project.getProjects.useQuery() 
     
 const [projectId, setProjectId] = useLocalStorage('codeatlas-projectId','')
 
