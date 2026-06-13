@@ -1,108 +1,208 @@
 import { GoogleGenAI } from "@google/genai";
 import type { Document } from "@langchain/core/documents";
+import { Type } from "@google/genai";
+
+export interface CommitItem {
+  hash: string;
+  message: string;
+  diff: string;
+}
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+export const aiSummariseCommit = async (
+  commits: CommitItem[],
+): Promise<string[]> => {
+  // Build the catalog containing up to 10 sliced diff blocks
+  const commitCatalog = commits
+    .map((commit) => {
+      return `
+      --- START COMMIT ID: ${commit.hash} ---
+      Commit Message: ${commit.message}
+      Diff Data:
+      ${commit.diff.slice(0, 10000)}
+      --- END COMMIT ID: ${commit.hash} ---`;
+    })
+    .join("\n\n");
 
-export const aiSummariseCommit = async (diff: string): Promise<string> => {
-    
-    const prompt = `
-                    You are an expert software engineer reviewing a git diff.
+  const prompt = `
+          You are an expert software engineer reviewing a log of multiple structural git commits.
 
-                    Your task is to write a concise summary of the changes introduced by the commit.
+          Your task is to analyze the provided git commit blocks and write a concise summary of the changes introduced by EACH commit.
 
-                    Reminders about the git diff format:
-                    - For every file, there are metadata lines indicating which files were modified.
-                    - A line starting with '+' was added.
-                    - A line starting with '-' was removed.
-                    - Lines starting with neither are context lines and not part of the change itself.
+          Reminders about the git diff format:
+          - For every file, there are metadata lines indicating which files were modified.
+          - A line starting with '+' was added.
+          - A line starting with '-' was removed.
+          - Lines starting with neither are context lines and not part of the change itself.
 
-                    Guidelines:
-                    - Produce a short list of a MAXIMUM of 2 to 3 bullet points.
-                    - Focus on what changed and why it matters.
-                    - Prioritize behavior changes, new features, bug fixes, and architectural changes.
-                    - Group related file changes into a single bullet point whenever possible.
-                    - Include affected file names in square brackets when there are one or two clearly relevant files.
-                    - If more than two files are involved in a change, omit file names for readability.
-                    - Ignore email headers, subject lines, and timestamps at the top of the diff file.
-                    - Ignore formatting-only changes and lockfile noise (package-lock.json, yarn.lock, etc.).
-                    - Prefer describing outcomes over code mechanics.
-                    - Keep each bullet concise (ideally under 25 words).
-                    - Output ONLY the bullet list. No intro text, no headings, no explanations.
+          Guidelines for EACH individual commit summary string:
+          - Produce a short list of a MAXIMUM of 2 to 3 markdown bullet points (using '*').
+          - Focus on what changed and why it matters.
+          - Prioritize behavior changes, new features, bug fixes, and architectural changes.
+          - Group related file changes into a single bullet point whenever possible.
+          - Include affected file names in square brackets when there are one or two clearly relevant files.
+          - If more than two files are involved in a change, omit file names for readability.
+          - Ignore email headers, subject lines, and timestamps at the top of the diff file.
+          - Ignore formatting-only changes and lockfile noise (package-lock.json, yarn.lock, etc.).
+          - Prefer describing outcomes over code mechanics.
+          - Keep each bullet concise (ideally under 25 words).
 
-                    Example summaries:
-                    * Raised the amount of returned recordings from '10' to '100' [packages/server/recordings_api.ts]
-                    * Fixed a typo in the GitHub Action workflow name [.github/workflows/summarizer.yml]
-                    * Moved the 'octokit' initialization into a dedicated module [src/octokit.ts], [src/index.ts]
+          Example of text style expected inside each summary property:
+          * Raised the amount of returned recordings from '10' to '100' [packages/server/recordings_api.ts]
+          * Fixed a typo in the GitHub Action workflow name [.github/workflows/summarizer.yml]
+          * Moved the 'octokit' initialization into a dedicated module [src/octokit.ts], [src/index.ts]
 
-                    Now summarize the following git diff: \n
-                    ${diff}
-                    `;
-    
-    //https://github.com/docker/genai-stack/commit/<commitHash>.diff
-    const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash", // or gemini-1.5-flash
-    contents: prompt,          // Swapped parameter name to 'contents'
-    });   
-    
-     if (!response?.text) {
-        throw new Error(`Error generating commit summary: No text response from model`);
-    }
-     return response.text ?? "";
-}
+          Strict Output Format:
+          You must strictly adhere to the requested JSON schema. Populate the 'summary' property for each commit hash with a single text string containing your 2-3 markdown bullet points. Do not provide introductory text, headings, or markdown code fences.
+          `;
 
+  //https://github.com/docker/genai-stack/commit/<commitHash>.diff
+  const response = await ai.models.generateContent({
+    model: "gemini-3.5-flash",
+    contents: [prompt, commitCatalog], // Pass the modified prompt + your diff data string
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          summaries: {
+            type: Type.ARRAY,
+            description:
+              "List of commit hashes mapped precisely to their structural summaries.",
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                hash: { type: Type.STRING },
+                summary: {
+                  type: Type.STRING,
+                  description:
+                    "2-3 dense markdown bullet points utilizing bracketed file references.",
+                },
+              },
+              required: ["hash", "summary"],
+            },
+          },
+        },
+        required: ["summaries"],
+      },
+    },
+  });
+  if (!response?.text) {
+    throw new Error(
+      "No response returned from Gemini commit batch summary processing.",
+    );
+  }
 
-export const aiSummariseCode = async (doc: Document): Promise<string> => {
-    console.log("Summarising code for file: ", doc.metadata.source)
+  const data = JSON.parse(response.text);
 
-    const code = doc.pageContent.slice(0, 10000); //limit to first 10k characters to avoid overwhelming the model
+  const lookupMap = new Map<string, string>(
+    data.summaries.map((item: { hash: string; summary: string }) => [
+      item.hash,
+      item.summary,
+    ]),
+  );
 
-    
-    const prompt = `
-                You are an expert technical documentation writer and software architect.
-                Your task is to analyze the source code of a file and provide a highly dense, functional summary optimized for vector database retrieval.
+  // Return the array perfectly sorted to match your incoming input array index
+  return commits.map(
+    (commit) => lookupMap.get(commit.hash) || "* Summary generation skipped.",
+  );
+};
 
-                File Name: ${doc.metadata.source}
+export const aiSummariseCode = async (docs: Document[]): Promise<string[]> => {
+  console.log(
+    `\nBatch summarising ${docs.length} files in a single API call...`,
+  );
 
+  // 1. Build the catalog using your smart 5k character limit rule
+  const fileBlocks = docs
+    .map((doc, index) => {
+      const code = doc.pageContent.slice(0, 5000);
+      return `--- FILE: ${doc.metadata.source} ---\n${code}\n--- END FILE ---`;
+    })
+    .join("\n\n");
+
+  const prompt = `
+               You are an expert technical documentation writer and software architect.
+               Your task is to analyze multiple source code files and provide a concise,highly dense, functional summary optimized for vector database retrieval for EACH file.
+                
                 Guidelines:
-                1. Focus on the core responsibility: Explain WHAT this file does and its architectural purpose in the application.
+                1. Focus on the core responsibility: Explain WHAT each file does and its architectural purpose.
                 2. Highlight key components: Mention major functions, exported modules, API routes, or database schemas defined within it.
                 3. Keep it concise: The summary MUST be under 100 words. Do not waste words on obvious implementation details (like "imports express").
-                4. Strict Output Format: Output ONLY the plain text summary. Do not include introductory phrases (like "This file is..."), headings, or markdown formatting blocks.
-
-                Source Code:
-                """
-                ${code}
-                """
+                4. Strict Output Format: Return the results strictly matching the requested JSON schema. Do not wrap the output in markdown code blocks or provide any trailing text.
                 `;
-                    
-    const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt
-    });
 
-    if (!response?.text) {
-        throw new Error(`No summary generated for file: ${doc.metadata.source}`);
-    }
-    
-    return response.text ?? "";
-}
-
-export async function aiGenerateEmbeddings(summary: string): Promise<number[]> {
-  const response = await ai.models.embedContent({
-    model: "gemini-embedding-2",
-    contents: summary, // Pass raw string
+  const response = await ai.models.generateContent({
+    model: "gemini-3.5-flash",
+    contents: [prompt, fileBlocks],
     config: {
-      outputDimensionality: 768, // Match your Prisma vector(768) requirement
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          summaries: {
+            type: Type.ARRAY,
+            description:
+              "List of files mapped directly to their individual summaries.",
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                fileName: { type: Type.STRING },
+                summary: { type: Type.STRING },
+              },
+              required: ["fileName", "summary"],
+            },
+          },
+        },
+        required: ["summaries"],
+      },
     },
   });
 
-  if (!response.embeddings || response.embeddings.length === 0) {
-    throw new Error("Failed to generate embedding vector");
+  if (!response?.text) {
+    throw new Error("No response from Gemini batch summarisation");
   }
 
-  // 2. Drill directly into the first object to grab the raw array of numbers
-  return response.embeddings[0]!.values || [];
-}
+  const data = JSON.parse(response.text);
 
-console.log(await aiGenerateEmbeddings("hello there how is it doing what on earth??"));
+  // 4. Map the response object back to a Map layout for safe, order-independent retrieval
+  const summaryMap = new Map<string, string>(
+    data.summaries.map((s: { fileName: string; summary: string }) => [
+      s.fileName,
+      s.summary,
+    ]),
+  );
+
+  // 5. Build your returned array. If Gemini missed a file, it falls back safely to an empty string
+  // instead of throwing an error or shifting your indexing positions.
+  return docs.map((doc) => summaryMap.get(doc.metadata.source) || "");
+};
+
+//Generate vector embeddings for an entire array of summaries in a single request.
+export async function generateBatchEmbeddings(
+  summaries: string[],
+): Promise<number[][]> {
+  console.log(
+    `\n⚡ Generating batch embeddings for ${summaries.length} summaries...`,
+  );
+
+  const response = await ai.models.embedContent({
+    // 1. Use 001 for flat multi-string batching arrays
+    model: "gemini-embedding-001",
+    contents: summaries,
+    config: {
+      outputDimensionality: 768, // Forces the model to scale down to 768 dimensions
+    },
+  });
+
+  // 2. Validate the backend plural array response packages
+  if (!response.embeddings || response.embeddings.length === 0) {
+    throw new Error(
+      "Failed to generate batch embedding vectors: Empty API response",
+    );
+  }
+
+  // 3. Drill down into each object array item to extract its raw values block
+  return response.embeddings.map((item) => item.values! || []);
+}

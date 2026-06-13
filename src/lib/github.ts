@@ -7,7 +7,7 @@ export const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
-type Response = {
+type CommitResponse = {
   commitMessage: string;
   commitHash: string;
   commitAuthorName: string;
@@ -15,11 +15,13 @@ type Response = {
   commitDate: string;
 };
 
+
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)); //delay function to avoid hitting gemini api rate limits
 
 export const getCommitHashes = async (
   githubUrl: string,
-): Promise<Response[]> => {
+): Promise<CommitResponse[]> => {
   const [owner, repo] = githubUrl.replace(/\/$/, "").split("/").slice(-2);
 
   if (!owner || !repo) {
@@ -58,27 +60,34 @@ export const pollCommits = async (projectId: string) => {
     commitHashes,
   );
 
-  // 1. Create an array to hold our resolved summary responses
-  const summaryResponses: string[] = [];
-
-  // 2. Process them sequentially instead of in parallel
-  for (const commit of unprocessedCommits) {
-    try {
-      const summary = await summariseCommit(githubUrl, commit.commitHash);
-      summaryResponses.push(summary);
-      
-      //  Wait 1 second before hitting the API again
-      // to ensure you stay well below the burst rate limit
-     // await delay(1000); 
-    } catch (error) {
-      console.error(
-        "Failed summary for commit:",
-        commit.commitHash,
-        error
-      );
-      summaryResponses.push(""); // Push empty string on failure so indexes still match
-    }
+  if (unprocessedCommits.length === 0) {
+    console.log("All commits up to date. No execution needed.");
+    return { count: 0 };
   }
+
+  const commitsWithDiffs = await Promise.all(
+    unprocessedCommits.map(async (commit) => {
+       let diffText = "";
+       try {
+        const { data } = await axios.get(`${githubUrl}/commit/${commit.commitHash}.diff`, {
+          headers: {
+            Accept: "application/vnd.github.v3.diff",
+          },
+        });
+        diffText = data;
+      } catch (error) {
+        console.error(`Error acquiring diff for commit context ${commit.commitHash}:`, error);
+        diffText = "[Diff data could not be fetched from GitHub engine]"; // Fallback payload
+      }
+       return {
+        hash: commit.commitHash,
+        message: commit.commitMessage,
+        diff: diffText,
+      };
+    })
+  )
+  const summaries = await aiSummariseCommit(commitsWithDiffs);
+
 
   const commitData = unprocessedCommits.map((commit, index) => ({
     projectId,
@@ -87,7 +96,7 @@ export const pollCommits = async (projectId: string) => {
     commitAuthorName: commit.commitAuthorName,
     commitAuthorAvatar: commit.commitAuthorAvatar,
     commitDate: new Date(commit.commitDate),
-    summary: summaryResponses[index] ?? "",
+    summary: summaries[index] || "* Summary generation skipped.",
   }));
 
   const commits = await db.commit.createMany({
@@ -95,19 +104,6 @@ export const pollCommits = async (projectId: string) => {
   });
   return commits;
 };
-
-async function summariseCommit(githubUrl: string, commitHash: string): Promise<string> {
-  // get the diff and pass into ai
-  const { data } = await axios.get(`${githubUrl}/commit/${commitHash}.diff`, {
-    headers: {
-      Accept: "application/vnd.github.v3.diff",
-    },
-  });
-
-  const truncatedDiffData = data.slice(0, 50000); //max 50k chars of diff data to summarise, can be adjusted based on token  limits and performance
-
-  return (await aiSummariseCommit(truncatedDiffData)) || "";
-}
 
 async function fetchProjectGithubUrl(projectId: string): Promise<{ project: any; githubUrl: string }> {
   const project = await db.project.findUnique({
@@ -127,8 +123,8 @@ async function fetchProjectGithubUrl(projectId: string): Promise<{ project: any;
 
 async function filterUnprocessedCommits(
   projectId: string,
-  commitHashes: Response[],
-): Promise<Response[]> {
+  commitHashes: CommitResponse[],
+): Promise<CommitResponse[]> {
   const processedCommits = await db.commit.findMany({
     where: { projectId },
   });
@@ -143,4 +139,3 @@ async function filterUnprocessedCommits(
   return unprocessedCommits;
 }
 
-// await pollCommits("cmpxrha8f0000etswihftfxrm").then(console.log);
