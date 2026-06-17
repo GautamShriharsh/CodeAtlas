@@ -10,6 +10,8 @@ export interface CommitItem {
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const aiSummariseCommit = async (
   commits: CommitItem[],
 ): Promise<string[]> => {
@@ -59,7 +61,7 @@ export const aiSummariseCommit = async (
 
   //https://github.com/docker/genai-stack/commit/<commitHash>.diff
   const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash",
+    model: "gemini-2.0-flash",
     contents: [prompt, commitCatalog], // Pass the modified prompt + your diff data string
     config: {
       responseMimeType: "application/json",
@@ -110,17 +112,16 @@ export const aiSummariseCommit = async (
 };
 
 export const aiSummariseCode = async (docs: Document[]): Promise<string[]> => {
-  console.log(
-    `\nBatch summarising ${docs.length} files in a single API call...`,
-  );
+  console.log(`\nBatch summarising ${docs.length} files safely...`);
 
-  // 1. Build the catalog using your smart 5k character limit rule
-  const fileBlocks = docs
-    .map((doc, index) => {
-      const code = doc.pageContent.slice(0, 5000);
-      return `--- FILE: ${doc.metadata.source} ---\n${code}\n--- END FILE ---`;
-    })
-    .join("\n\n");
+  // 1. Split your files into manageable chunks of 50 files each
+  const chunkSize = 50;
+  const chunks: Document[][] = [];
+  for (let i = 0; i < docs.length; i += chunkSize) {
+    chunks.push(docs.slice(i, i + chunkSize));
+  }
+
+  const allSummariesMap = new Map<string, string>();
 
   const prompt = `
                You are an expert technical documentation writer and software architect.
@@ -133,50 +134,60 @@ export const aiSummariseCode = async (docs: Document[]): Promise<string[]> => {
                 4. Strict Output Format: Return the results strictly matching the requested JSON schema. Do not wrap the output in markdown code blocks or provide any trailing text.
                 `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash",
-    contents: [prompt, fileBlocks],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          summaries: {
-            type: Type.ARRAY,
-            description:
-              "List of files mapped directly to their individual summaries.",
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                fileName: { type: Type.STRING },
-                summary: { type: Type.STRING },
+  // 2. Process each chunk sequentially
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i]!;
+    console.log(
+      `⏳ Processing chunk ${i + 1} of ${chunks.length} (${chunk.length} files)...`,
+    );
+
+    const fileBlocks = chunk
+      .map((doc) => {
+        return `--- FILE: ${doc.metadata.source} ---\n${doc.pageContent}\n--- END FILE ---`;
+      })
+      .join("\n\n");
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.1-flash-lite", 
+      contents: [prompt, fileBlocks],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            summaries: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  fileName: { type: Type.STRING },
+                  summary: { type: Type.STRING },
+                },
+                required: ["fileName", "summary"],
               },
-              required: ["fileName", "summary"],
             },
           },
+          required: ["summaries"],
         },
-        required: ["summaries"],
       },
-    },
-  });
+    });
 
-  if (!response?.text) {
-    throw new Error("No response from Gemini batch summarisation");
+    if (response?.text) {
+      const data = JSON.parse(response.text);
+      data.summaries.forEach((s: { fileName: string; summary: string }) => {
+        allSummariesMap.set(s.fileName, s.summary);
+      });
+    }
+
+    // 2 second breathing room between chunks to clear the token rate limit
+    if (i < chunks.length - 1) {
+      console.log("Pausing for 2 seconds to respect API rate boundaries...");
+      await sleep(2000);
+    }
   }
 
-  const data = JSON.parse(response.text);
-
-  // 4. Map the response object back to a Map layout for safe, order-independent retrieval
-  const summaryMap = new Map<string, string>(
-    data.summaries.map((s: { fileName: string; summary: string }) => [
-      s.fileName,
-      s.summary,
-    ]),
-  );
-
-  // 5. Build your returned array. If Gemini missed a file, it falls back safely to an empty string
-  // instead of throwing an error or shifting your indexing positions.
-  return docs.map((doc) => summaryMap.get(doc.metadata.source) || "");
+  
+  return docs.map((doc) => allSummariesMap.get(doc.metadata.source) || "");
 };
 
 //Generate vector embeddings for an entire array of summaries in a single request.

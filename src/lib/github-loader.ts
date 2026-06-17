@@ -8,13 +8,44 @@ import {
 import { db } from "@/server/db";
 import { createId } from "@paralleldrive/cuid2";
 
+// detects the branch for the repo
+const getDefaultBranch = async (
+  githubUrl: string,
+  githubToken?: string
+): Promise<string> => {
+  // Extract owner/repo from URL
+  const match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?$/);
+  if (!match) throw new Error(`Invalid GitHub URL: ${githubUrl}`);
+
+  const [, owner, repo] = match;
+
+  const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+    headers: {
+      Authorization: `Bearer ${githubToken || process.env.GITHUB_TOKEN}`,
+      Accept: "application/vnd.github+json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch repo metadata: ${response.status}`);
+  }
+
+  const data = await response.json() as { default_branch: string };
+  console.log(`🌿 Detected default branch: ${data.default_branch}`);
+  return data.default_branch;
+};
+
 export const loadGithubRepo = async (
   githubUrl: string,
   githubToken?: string,
 ): Promise<Document[]> => {
+  
+  const branch = await getDefaultBranch(githubUrl, githubToken);
+
+  
   const loader = new GithubRepoLoader(githubUrl, {
     accessToken: githubToken || process.env.GITHUB_TOKEN,
-    branch: "master",
+    branch,
     ignoreFiles: [
       /^node_modules\//,
       /^\.git\//,

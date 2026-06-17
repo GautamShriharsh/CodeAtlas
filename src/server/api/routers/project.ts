@@ -26,7 +26,7 @@ export const projectRouter = createTRPCRouter({
             }
         })
         await indexGithubRepo(project.id, input.githubUrl, input.githubToken);
-        await pollCommits(project.id);
+        //await pollCommits(project.id); paused for now
         return project;
     }),
 
@@ -47,7 +47,7 @@ export const projectRouter = createTRPCRouter({
     getCommits: protectedProcedure.input(z.object({
         projectId: z.string(),
     })).query(async ({ctx,input}) => {
-        await pollCommits(input.projectId).then().catch(console.error)
+        // await pollCommits(input.projectId).then().catch(console.error) paused for sometime
         const commits = await ctx.db.commit.findMany({
             where: {
                 projectId: input.projectId!
