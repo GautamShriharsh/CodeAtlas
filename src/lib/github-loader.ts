@@ -1,5 +1,6 @@
 import { GithubRepoLoader } from "@langchain/community/document_loaders/web/github";
 import type { Document } from "@langchain/core/documents";
+import { minimatch } from "minimatch";
 import {
   aiSummariseCode,
   aiSummariseCommit,
@@ -7,6 +8,34 @@ import {
 } from "./gemini";
 import { db } from "@/server/db";
 import { createId } from "@paralleldrive/cuid2";
+
+const MAX_FILES = 150; //  limit for no of files
+
+const IGNORE_PATTERNS = [
+  // Lock files
+  'package-lock.json',
+  'yarn.lock',
+  'pnpm-lock.yaml',
+
+  // Config/meta files
+  '**/*.json',
+  '**/*.config.*',
+  '**/*.mjs',
+  '**/*.css',
+  '.gitignore',
+
+  // Folders to skip
+  'public/**',
+  'src/components/ui/**',
+  'node_modules/**',
+  '.git/**',
+];
+
+const shouldIgnore = (filePath: string): boolean => {
+  return IGNORE_PATTERNS.some(pattern =>
+    minimatch(filePath, pattern, { matchBase: true })
+  );
+};
 
 // detects the branch for the repo
 const getDefaultBranch = async (
@@ -98,8 +127,21 @@ export const loadGithubRepo = async (
   console.log(" Fetching repository structure from GitHub...");
 
   const docs = await loader.load();
+  const filtered = docs.filter(doc => !shouldIgnore(doc.metadata.source));
 
-  return docs;
+   console.log(`Downloaded ${filtered.length} files from GitHub.`);
+
+  // Guard against massive repos
+  if (filtered.length > MAX_FILES) {
+    throw new Error(
+      `Repository too large to index: ${filtered.length} files found. ` +
+      `Maximum supported is ${MAX_FILES} files. ` +
+      `Try a smaller or more focused repository.`
+    );
+  }
+
+  return filtered;
+
 };
 
 

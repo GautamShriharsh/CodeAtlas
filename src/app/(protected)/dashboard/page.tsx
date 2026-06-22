@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ExternalLinkIcon } from "lucide-react";
 import { FiGithub } from "react-icons/fi";
 import CommitLog from "./commit-log";
+import AskQuestionCard from './ask-question-card';
 
 function Dashboard() {
   const { user } = useUser();
@@ -47,14 +48,17 @@ function Dashboard() {
       </div>
 
       {/* Cards Row */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-lg border p-4">AskQuestionCard</div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+        {/* <div className="rounded-lg border p-4">AskQuestionCard</div> */}
+        <div className="md:col-span-3"><AskQuestionCard /></div>
 
-        <div className="rounded-lg border p-4">MeetingCard</div>
+
+        <div className="rounded-lg border p-4 md:col-span-2">MeetingCard</div>
       </div>
 
       {/* Commit Log Full Width */}
-      <div className="rounded-lg  p-4"><CommitLog /></div>
+      {/* <div className="rounded-lg  p-4"><CommitLog /></div> */} 
+      {/* paused for now */}
     </div>
   );
 }
