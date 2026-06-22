@@ -199,11 +199,11 @@ export async function generateBatchEmbeddings(
   );
 
   const response = await ai.models.embedContent({
-    // 1. Use 001 for flat multi-string batching arrays
+    
     model: "gemini-embedding-001",
     contents: summaries,
     config: {
-      outputDimensionality: 768, // Forces the model to scale down to 768 dimensions
+      outputDimensionality: 768,
     },
   });
 
@@ -214,6 +214,33 @@ export async function generateBatchEmbeddings(
     );
   }
 
-  // 3. Drill down into each object array item to extract its raw values block
   return response.embeddings.map((item) => item.values! || []);
+}
+
+
+export async function generateEmbedding(text: string): Promise<number[]> {
+  console.log(`\n🔮 Generating single embedding vector for query: "${text}"`);
+
+  const response = await ai.models.embedContent({
+    model: "gemini-embedding-001",
+    contents: text, 
+    config: {
+      taskType: "RETRIEVAL_QUERY", 
+      outputDimensionality: 768,   
+    },
+  });
+
+  if (!response.embeddings || response.embeddings.length === 0) {
+    throw new Error(
+      "Failed to generate query embedding vector: Empty API response structure",
+    );
+  }
+
+  const firstEmbedding = response.embeddings[0];
+  if (!firstEmbedding || !firstEmbedding.values) {
+    throw new Error("Failed to extract vector values from first embedding token.");
+  }
+
+
+  return firstEmbedding.values;
 }
