@@ -2,7 +2,7 @@
 
 
 # testing 
-src\lib\test-ingest.ts
+src/lib/test-ingest.ts
 # dependencies
 /node_modules
 /.pnp
