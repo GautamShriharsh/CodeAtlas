@@ -20,6 +20,8 @@ model User  {
     imageUrl String?
     firstName String?
     lastName String?
+
+    askedQuestions Questions[]
     
     emailAddress String @unique
     credits Int @default(150)
@@ -36,6 +38,8 @@ model Project {
     name String
     githubUrl String
     githubToken String?
+
+    savedQuestions Questions[]
 
     deletedAt DateTime?
     
@@ -89,4 +93,23 @@ model SourceCodeEmbedding {
     project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
     
     
+}
+
+model Questions {
+    id String @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    question String
+    answer String
+
+    fileReferences Json?
+
+    projectId String
+    project Project @relation(fields: [projectId],references: [id])
+
+    userId String
+    user User @relation(fields: [userId],references: [id])
+
+
 }
