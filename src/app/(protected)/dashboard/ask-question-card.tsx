@@ -24,6 +24,7 @@ import MDEditor from "@uiw/react-md-editor";
 import CodeReferences from "./code-references";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import useRefetch from "@/hooks/use-Refetch";
 
 const PLACEHOLDER_QUESTIONS = [
   "How does the authentication session propagate to the client layers?",
@@ -47,9 +48,12 @@ const AskQuestionCard = () => {
     "Ask a question about this repository...",
   );
 
+  const refetch = useRefetch();
+
   const saveAnswer = api.project.saveAnswer.useMutation({
     onSuccess: () => {
       toast.success("Answer saved");
+      refetch();
     },
     onError: () => {
       toast.error("Failed to save answer");

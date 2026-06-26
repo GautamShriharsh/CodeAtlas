@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { shadesOfPurple  } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { a11yDark  } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 type FileReference = {
@@ -70,7 +70,7 @@ const CodeReferences = ({ fileReferences }: Props) => {
           <div className="overflow-y-auto rounded-lg border border-slate-800">
             <SyntaxHighlighter
               language={languageFromFileName(file.fileName)}
-              style={shadesOfPurple}
+              style={a11yDark}
               showLineNumbers
               customStyle={{
                 background: 'transparent',
