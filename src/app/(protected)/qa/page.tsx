@@ -12,10 +12,10 @@ import AskQuestionCard from "../dashboard/ask-question-card";
 import useProject from "@/hooks/use-projects";
 import MDEditor from "@uiw/react-md-editor";
 import CodeReferences from "../dashboard/code-references";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { QuestionsSkeleton } from "@/components/skeleton";
 
 // 1. Define the explicit shape of your JSON object
 type FileReference = {
@@ -26,7 +26,7 @@ type FileReference = {
 
 const QAPage = () => {
   const { project } = useProject();
-  const { data: questionAnswers } = api.project.getQuestions.useQuery({
+  const { data: questionAnswers, isLoading } = api.project.getQuestions.useQuery({
     projectId: project?.id ?? "",
   });
   const [questionIndex, setQuestionIndex] = useState<number | null>(null);
@@ -35,7 +35,6 @@ const QAPage = () => {
   const questionAnswer =
     questionIndex !== null ? questionAnswers?.[questionIndex] : null;
 
-  // Cast the selected question's references safely
   const selectedFileReferences = questionAnswer?.fileReferences as
     | FileReference[]
     | null;
@@ -55,17 +54,18 @@ const QAPage = () => {
             </span>
           )}
         </h2>
-
-        {!questionAnswers || questionAnswers.length === 0 ? (
+         
+        {isLoading ? (
+          <QuestionsSkeleton/>
+        ):
+        (!questionAnswers || questionAnswers.length === 0) ? (
           <p className="text-muted-foreground text-sm">
             No saved answers yet. Ask a question above and save the answer.
           </p>
         ) : (
           <div className="flex flex-col gap-3">
             {questionAnswers.map((qa, index) => {
-              // 2. Cast the JSON array inside the map loop so TypeScript knows it has a .length
-              const refs = qa.fileReferences as FileReference[] | null;
-
+            
               return (
                 <div
                   key={qa.id}
@@ -83,7 +83,7 @@ const QAPage = () => {
                       e.stopPropagation();
                       // deleteQuestion.mutate({ id: qa.id })
                     }}
-                    className="hover:bg-destructive/10 hover:text-destructive absolute top-3 right-3 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+                    className="hover:bg-destructive/10 hover:text-destructive hover:cursor-pointer absolute top-3 right-3 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>

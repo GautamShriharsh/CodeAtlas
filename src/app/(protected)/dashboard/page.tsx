@@ -8,6 +8,7 @@ import { ExternalLinkIcon } from "lucide-react";
 import { FiGithub } from "react-icons/fi";
 import CommitLog from "./commit-log";
 import AskQuestionCard from './ask-question-card';
+import ArchiveButton from "./archive-button";
 
 function Dashboard() {
   const { user } = useUser();
@@ -43,7 +44,7 @@ function Dashboard() {
         <div className="flex items-center gap-4">
           <div>TeamMembers</div>
           <div>InviteButton</div>
-          <div>ArchiveButton</div>
+          <div> <ArchiveButton projectId={projectId}/></div>
         </div>
       </div>
 
