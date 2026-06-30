@@ -115,7 +115,7 @@ const CreatePage = () => {
 
           <Button
             type="submit"
-            className="w-full bg-gray-500/15 hover:bg-gray-500/33 text-white"
+            className="w-full bg-gray-500/15 hover:bg-gray-500/33 hover:cursor-pointer text-white"
             disabled={createProject.isPending}
           >
             {createProject.isPending ? "Creating..." : "Create Project"}

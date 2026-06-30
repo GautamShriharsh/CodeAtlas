@@ -4,15 +4,44 @@ import React from "react";
 import useProject from "@/hooks/use-projects";
 import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
-import { ExternalLinkIcon } from "lucide-react";
+import { ExternalLinkIcon, Loader2 } from "lucide-react";
 import { FiGithub } from "react-icons/fi";
 import CommitLog from "./commit-log";
 import AskQuestionCard from './ask-question-card';
 import ArchiveButton from "./archive-button";
+import EmptyState from "./empty-state";
 
 function Dashboard() {
   const { user } = useUser();
-  const { projects, project, projectId } = useProject();
+  const { projects, project, projectId, isLoading } = useProject();
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400/20" />
+        <p className="text-sm text-muted-foreground animate-pulse">
+          Loading workspace data...
+        </p>
+      </div>
+    );
+  }
+
+  if (!projects || projects.length === 0) {
+    return (
+      <div className="space-y-6">
+        <EmptyState /> 
+      </div>
+    );
+  }
+
+  
+  if (!project) {
+    return (
+      <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
+        <p className="text-muted-foreground">Please select a project from the sidebar to view insights.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

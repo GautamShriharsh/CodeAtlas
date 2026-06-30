@@ -13,9 +13,10 @@ import useProject from "@/hooks/use-projects";
 import MDEditor from "@uiw/react-md-editor";
 import CodeReferences from "../dashboard/code-references";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { QuestionsSkeleton } from "@/components/skeleton";
+import EmptyState from "../dashboard/empty-state";
 
 // 1. Define the explicit shape of your JSON object
 type FileReference = {
@@ -25,8 +26,8 @@ type FileReference = {
 };
 
 const QAPage = () => {
-  const { project } = useProject();
-  const { data: questionAnswers, isLoading } = api.project.getQuestions.useQuery({
+  const { project, projects, isLoading: projectLoading } = useProject();
+  const { data: questionAnswers, isLoading: qaLoading } = api.project.getQuestions.useQuery({
     projectId: project?.id ?? "",
   });
   const [questionIndex, setQuestionIndex] = useState<number | null>(null);
@@ -38,6 +39,34 @@ const QAPage = () => {
   const selectedFileReferences = questionAnswer?.fileReferences as
     | FileReference[]
     | null;
+  
+  if (projectLoading) {
+      return (
+        <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400/20" />
+          <p className="text-sm text-muted-foreground animate-pulse">
+            Loading workspace data...
+          </p>
+        </div>
+      );
+    }
+  
+  if (!projects || projects.length === 0) {
+    return (
+      <div className="space-y-6">
+        <EmptyState /> 
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
+        <p className="text-muted-foreground">Please select a project from the sidebar to view insights.</p>
+      </div>
+    );
+  }
+    
 
   return (
     <div className="space-y-6">
@@ -55,7 +84,7 @@ const QAPage = () => {
           )}
         </h2>
          
-        {isLoading ? (
+        {qaLoading ? (
           <QuestionsSkeleton/>
         ):
         (!questionAnswers || questionAnswers.length === 0) ? (

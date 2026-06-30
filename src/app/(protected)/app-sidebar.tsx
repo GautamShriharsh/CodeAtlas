@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bot,
+  ChevronLeft,
   CreditCard,
   LayoutDashboard,
+  Menu,
+  PanelLeft,
+  PanelLeftClose,
   Plus,
   Presentation,
 } from "lucide-react";
@@ -25,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import useProject from "@/hooks/use-projects";
+import { Button } from "@/components/ui/button";
 
 const items = [
   {
@@ -51,16 +56,47 @@ const items = [
 
 const AppSideBar = () => {
   const pathname = usePathname();
-  const { open } = useSidebar();
   const { projects, projectId, setProjectId } = useProject();
+  const router = useRouter();
+  const { open, toggleSidebar } = useSidebar();
 
   return (
     <Sidebar collapsible="icon" variant="floating">
-      <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <Image src="/chip1.svg" alt="Logo" width={38} height={38} />
-          {open && <span className="text-lg font-bold">CodeAtlas</span>}
-        </div>
+      <SidebarHeader
+        className={cn(
+          "flex p-2 transition-all duration-200",
+          open
+            ? "flex-row items-center justify-between"
+            : "flex-col items-center justify-center",
+        )}
+      >
+        {open && (
+          <div className="animate-in fade-in flex items-center gap-2 duration-200">
+            <Image
+              src="/chip1.svg"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="shrink-0"
+            />
+            <span className="text-foreground text-lg font-bold tracking-tight">
+              CodeAtlas
+            </span>
+          </div>
+        )}
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          className={cn(
+            "text-muted-foreground h-7 w-7 transition-colors hover:cursor-pointer hover:text-white",
+            !open && "mx-auto",
+          )}
+        >
+          <PanelLeft className="h-4 w-4" />
+          <span className="sr-only">Toggle Sidebar</span>
+        </Button>
       </SidebarHeader>
 
       <SidebarContent>
@@ -78,7 +114,7 @@ const AppSideBar = () => {
                       <Link
                         href={item.url}
                         className={cn(
-                          "transition-colors",
+                          "transition-colors hover:text-white",
                           isActive &&
                             "bg-gray-500/15 font-medium text-white hover:bg-gray-500/20",
                         )}
@@ -105,9 +141,12 @@ const AppSideBar = () => {
                 return (
                   <SidebarMenuItem key={project.id}>
                     <SidebarMenuButton
-                      onClick={() => setProjectId(project.id)}
+                      onClick={() => {
+                        setProjectId(project.id);
+                        router.push("/dashboard");
+                      }}
                       className={cn(
-                        "transition-colors",
+                        "transition-colors hover:cursor-pointer",
                         isSelected &&
                           "bg-gray-500/15 font-medium text-white hover:bg-gray-500/20",
                       )}
@@ -130,7 +169,7 @@ const AppSideBar = () => {
               })}
               <SidebarMenuItem>
                 <Link href="/create">
-                  <SidebarMenuButton className="hover:border-gray-20 border border-dashed border-gray-500/15">
+                  <SidebarMenuButton className="hover:border-gray-20 border border-dashed border-gray-500/15 hover:cursor-pointer">
                     <Plus className="h-4 w-4" />
                     {open && <span>Create Project</span>}
                   </SidebarMenuButton>

@@ -1,5 +1,5 @@
 import React from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"; // 🚀 1. Import the trigger
 import { UserButton } from "@clerk/nextjs";
 import AppSideBar from "./app-sidebar";
 
@@ -17,6 +17,9 @@ const SideBarLayout = ({ children }: Props) => {
         {/* Top Navbar */}
         <div className="flex items-center gap-4 border-sidebar-border bg-sidebar border shadow rounded-md p-3 px-4">
           
+          {/* 🚀 2. Drop the button here. It automatically handles the onClick state under the hood! */}
+         
+
           {/* Search goes here */}
           <div className="flex-1">
             {/* <SearchBar /> */}
