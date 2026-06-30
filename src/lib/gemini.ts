@@ -61,7 +61,7 @@ export const aiSummariseCommit = async (
 
   //https://github.com/docker/genai-stack/commit/<commitHash>.diff
   const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
+    model: "gemini-3.1-flash-lite",
     contents: [prompt, commitCatalog], // Pass the modified prompt + your diff data string
     config: {
       responseMimeType: "application/json",
