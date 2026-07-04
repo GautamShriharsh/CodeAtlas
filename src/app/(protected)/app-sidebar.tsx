@@ -31,6 +31,7 @@ import Image from "next/image";
 import useProject from "@/hooks/use-projects";
 import { Button } from "@/components/ui/button";
 
+
 const items = [
   {
     title: "Dashboard",
@@ -143,7 +144,7 @@ const AppSideBar = () => {
                     <SidebarMenuButton
                       onClick={() => {
                         setProjectId(project.id);
-                        router.push("/dashboard");
+                        router.push(`${pathname}`);
                       }}
                       className={cn(
                         "transition-colors hover:cursor-pointer",
@@ -155,8 +156,8 @@ const AppSideBar = () => {
                         className={cn(
                           "flex size-5 items-center justify-center rounded-md text-[10px] font-semibold",
                           isSelected
-                            ? "bg-cyan-500/50 text-white"
-                            : "bg-cyan-500/20 text-cyan-400",
+                            ? "bg-cyan-500/20 text-white"
+                            : "bg-cyan-500/20 text-white",
                         )}
                       >
                         {project.name.charAt(0).toUpperCase()}

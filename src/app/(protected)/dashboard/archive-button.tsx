@@ -45,9 +45,10 @@ const ArchiveButton = ({projectId} : {projectId : string}) => {
       {/* Trigger element automatically hooks up accessibility and click listeners */}
       <AlertDialogTrigger asChild>
         <Button 
+          variant="outline"
           disabled={archiveProject.isPending}
           size='sm'  
-          className='hover:cursor-pointer bg-gray-500/20 hover:bg-gray-500/30 text-white'
+          className='hover:cursor-pointer'
         >
           {archiveProject.isPending ? 'Archiving...' : 'Archive'}
         </Button>
