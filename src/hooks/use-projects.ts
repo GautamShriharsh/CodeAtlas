@@ -1,5 +1,5 @@
 import { api } from '@/trpc/react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import {useLocalStorage} from 'usehooks-ts'
 
 
@@ -13,10 +13,16 @@ const project =
   projects?.find((p) => p.id === projectId) ??
   projects?.[0];
 
+  useEffect(() => {
+    if (project && projectId !== project.id) {
+      setProjectId(project.id)
+    }
+  }, [project, projectId, setProjectId])
+
   return {
     projects,
     project,
-    projectId,
+    projectId: project?.id ?? '',
     setProjectId,
     isLoading
   }
