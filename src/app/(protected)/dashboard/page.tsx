@@ -10,21 +10,28 @@ import CommitLog from "./commit-log";
 import AskQuestionCard from './ask-question-card';
 import ArchiveButton from "./archive-button";
 import EmptyState from "./empty-state";
+import InviteButton from "./invite-button";
+import {PolygonLoader, FlippingCubeLoader} from '@/components/loaders/loaders'
+import TeamMembers from "./team-members";
 
 function Dashboard() {
   const { user } = useUser();
   const { projects, project, projectId, isLoading } = useProject();
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400/20" />
-        <p className="text-sm text-muted-foreground animate-pulse">
-          Loading workspace data...
-        </p>
-      </div>
-    );
-  }
+  
+if (isLoading) { 
+  return (
+    <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-4 text-center">
+      
+      {/* The loader inherits the text-cyan-400 color automatically via currentColor */}
+      <FlippingCubeLoader />
+      
+      {/* We keep the text muted-foreground so it doesn't conflict with the bright cyan */}
+      <p className="text-sm text-muted-foreground animate-pulse">
+        Loading workspace data...
+      </p>
+    </div>
+  );
+}
 
   if (!projects || projects.length === 0) {
     return (
@@ -71,8 +78,8 @@ function Dashboard() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-4">
-          <div>TeamMembers</div>
-          <div>InviteButton</div>
+          <div><TeamMembers/></div>
+          <div><InviteButton/></div>
           <div> <ArchiveButton projectId={projectId}/></div>
         </div>
       </div>
