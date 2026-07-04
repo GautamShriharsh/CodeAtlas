@@ -17,6 +17,7 @@ import { Loader2, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { QuestionsSkeleton } from "@/components/skeleton";
 import EmptyState from "../dashboard/empty-state";
+import { FlippingCubeLoader } from "@/components/loaders/loaders";
 
 // 1. Define the explicit shape of your JSON object
 type FileReference = {
@@ -40,16 +41,21 @@ const QAPage = () => {
     | FileReference[]
     | null;
   
-  if (projectLoading) {
-      return (
-        <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400/20" />
-          <p className="text-sm text-muted-foreground animate-pulse">
-            Loading workspace data...
-          </p>
-        </div>
-      );
-    }
+  
+  if (projectLoading) { 
+    return (
+      <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-4 text-center">
+        
+        {/* The loader inherits the text-cyan-400 color automatically via currentColor */}
+        <FlippingCubeLoader />
+        
+        {/* We keep the text muted-foreground so it doesn't conflict with the bright cyan */}
+        <p className="text-sm text-muted-foreground animate-pulse">
+          Loading workspace data...
+        </p>
+      </div>
+    );
+  }
   
   if (!projects || projects.length === 0) {
     return (
