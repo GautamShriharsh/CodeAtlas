@@ -7,45 +7,48 @@ import Link from "next/link";
 import { ExternalLinkIcon, Loader2 } from "lucide-react";
 import { FiGithub } from "react-icons/fi";
 import CommitLog from "./commit-log";
-import AskQuestionCard from './ask-question-card';
+import AskQuestionCard from "./ask-question-card";
 import ArchiveButton from "./archive-button";
 import EmptyState from "./empty-state";
 import InviteButton from "./invite-button";
-import {PolygonLoader, FlippingCubeLoader} from '@/components/loaders/loaders'
+import {
+  PolygonLoader,
+  FlippingCubeLoader,
+} from "@/components/loaders/loaders";
 import TeamMembers from "./team-members";
 
 function Dashboard() {
   const { user } = useUser();
   const { projects, project, projectId, isLoading } = useProject();
-  
-if (isLoading) { 
-  return (
-    <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-4 text-center">
-      
-      {/* The loader inherits the text-cyan-400 color automatically via currentColor */}
-      <FlippingCubeLoader />
-      
-      {/* We keep the text muted-foreground so it doesn't conflict with the bright cyan */}
-      <p className="text-sm text-muted-foreground animate-pulse">
-        Loading workspace data...
-      </p>
-    </div>
-  );
-}
 
-  if (!projects || projects.length === 0) {
+  if (isLoading) {
     return (
-      <div className="space-y-6">
-        <EmptyState /> 
+      <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-4 text-center">
+        {/* The loader inherits the text-cyan-400 color automatically via currentColor */}
+        <FlippingCubeLoader />
+
+        {/* We keep the text muted-foreground so it doesn't conflict with the bright cyan */}
+        <p className="text-muted-foreground animate-pulse text-sm">
+          Loading workspace data...
+        </p>
       </div>
     );
   }
 
-  
+  if (!projects || projects.length === 0) {
+    return (
+      <div className="space-y-6">
+        <EmptyState />
+      </div>
+    );
+  }
+
   if (!project) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
-        <p className="text-muted-foreground">Please select a project from the sidebar to view insights.</p>
+        <p className="text-muted-foreground">
+          Please select a project from the sidebar to view insights.
+        </p>
       </div>
     );
   }
@@ -78,23 +81,29 @@ if (isLoading) {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-4">
-          <div><TeamMembers/></div>
-          <div><InviteButton/></div>
-          <div> <ArchiveButton projectId={projectId}/></div>
+          <div>
+            <TeamMembers />
+          </div>
+          <div>
+            <InviteButton />
+          </div>
+          <div>
+            {" "}
+            <ArchiveButton projectId={projectId} />
+          </div>
         </div>
       </div>
 
       {/* Cards Row */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-        {/* <div className="rounded-lg border p-4">AskQuestionCard</div> */}
-        <div className="md:col-span-3"><AskQuestionCard /></div>
-
-
-        <div className="rounded-lg border p-4 md:col-span-2">MeetingCard</div>
+      <div className="grid grid-cols-1 gap-4">
+        {/* 🚀 AskQuestionCard now takes up full horizontal layout space gracefully */}
+        <div className="w-full">
+          <AskQuestionCard />
+        </div>
       </div>
 
       {/* Commit Log Full Width */}
-      {/* <div className="rounded-lg  p-4"><CommitLog /></div> */} 
+      {/* <div className="rounded-lg  p-4"><CommitLog /></div> */}
       {/* paused for now */}
     </div>
   );
