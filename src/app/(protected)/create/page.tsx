@@ -5,8 +5,12 @@ import { Button } from "@/components/ui/button";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { api } from "@/trpc/react";
-import {toast} from 'sonner'
+import { toast } from 'sonner';
 import useRefetch from "@/hooks/use-Refetch";
+import useProject from "@/hooks/use-projects";
+import { useRouter } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Info, AlertTriangle, Coins } from "lucide-react";
 
 type FormInput = {
   repoUrl: string;
@@ -22,26 +26,45 @@ const CreatePage = () => {
     formState: { isSubmitting },
   } = useForm<FormInput>();
 
+  const router = useRouter();
   const createProject = api.project.createProject.useMutation();
+  const checkCredits = api.project.checkCredits.useMutation();
+  const { setProjectId } = useProject();
+  const refetch = useRefetch();
 
-  const refetch = useRefetch()
+  const hasEnoughCredits = checkCredits.data != null ? checkCredits.data?.fileCount <= checkCredits.data?.credits : true;
 
   async function onSubmit(data: FormInput) {
-
-    createProject.mutate({
-      name: data.projectName,
-      githubUrl: data.repoUrl,
-      githubToken: data.githubToken
-    },{
-      onSuccess: () => {
-        toast.success('Project created successfully')
-        refetch()
-      },
-      onError: () => {
-        toast.error('Failed to create project')
+    if (checkCredits.data) {
+      if (!hasEnoughCredits) {
+        toast.error('Insufficient credits to index this repository');
+        return;
       }
-    })
-    reset();
+
+      createProject.mutate({
+        name: data.projectName,
+        githubUrl: data.repoUrl,
+        githubToken: data.githubToken
+      }, {
+        onSuccess: (newProject) => {
+          toast.success('Project created successfully');
+          refetch();
+          if (newProject?.id) {
+            setProjectId(newProject.id);
+          }
+          router.push("/dashboard");
+          reset();
+        },
+        onError: () => {
+          toast.error('Failed to create project');
+        }
+      });
+    } else {
+      checkCredits.mutate({
+        githubUrl: data.repoUrl,
+        githubToken: data.githubToken
+      });
+    }
   }
 
   return (
@@ -75,7 +98,6 @@ const CreatePage = () => {
             <label className="text-sm font-medium">
               Project Name
             </label>
-
             <Input
               placeholder="CodeAtlas"
               {...register("projectName", {
@@ -88,7 +110,6 @@ const CreatePage = () => {
             <label className="text-sm font-medium">
               Repository URL
             </label>
-
             <Input
               placeholder="https://github.com/username/repository"
               type="url"
@@ -105,7 +126,6 @@ const CreatePage = () => {
                 (optional)
               </span>
             </label>
-
             <Input
               type="password"
               placeholder="ghp_xxxxxxxx"
@@ -113,12 +133,54 @@ const CreatePage = () => {
             />
           </div>
 
+          {/* 🚀 Dynamic Credits Status Info Block */}
+          {checkCredits.data && (
+            <div className="animate-in fade-in-50 slide-in-from-bottom-2 duration-200">
+              {hasEnoughCredits ? (
+                <Alert className="bg-cyan-500/5 border-cyan-500/20">
+                  <Coins className="h-4 w-4 text-cyan-400" />
+                  <AlertTitle className="text-cyan-400 font-medium">Credit Verification</AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground mt-1.5 space-y-1">
+                    <div className="flex justify-between">
+                      <span>Files to Index (Required Credits):</span>
+                      <span className="font-semibold text-foreground">{checkCredits.data.fileCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Your Available Balance:</span>
+                      <span className="font-semibold text-emerald-400">{checkCredits.data.credits} tokens</span>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle className="font-semibold">Insufficient Balance</AlertTitle>
+                  <AlertDescription className="text-xs mt-1.5 space-y-1 opacity-90">
+                    <div className="flex justify-between">
+                      <span>This repo requires:</span>
+                      <span className="font-bold">{checkCredits.data.fileCount} credits</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>You currently have:</span>
+                      <span className="font-bold">{checkCredits.data.credits} credits</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground pt-1 italic">
+                      Please go to your Billing section to purchase additional indexing allocation credits.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          )}
+
           <Button
             type="submit"
             className="w-full bg-gray-500/15 hover:bg-gray-500/33 hover:cursor-pointer text-white"
-            disabled={createProject.isPending}
+            disabled={createProject.isPending || checkCredits.isPending || (!hasEnoughCredits && !!checkCredits.data)}
           >
-            {createProject.isPending ? "Creating..." : "Create Project"}
+            {checkCredits.isPending ? "Analyzing Repository..." : (
+              checkCredits.data ? (createProject.isPending ? "Creating..." : "Create Project") : "Check Credits"
+            )}
           </Button>
         </form>
       </div>

@@ -1,7 +1,7 @@
 import z from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { pollCommits } from "@/lib/github";
-import { indexGithubRepo } from "@/lib/github-loader";
+import { checkCredits, indexGithubRepo } from "@/lib/github-loader";
 import { TRPCError } from "@trpc/server";
 
 export const projectRouter = createTRPCRouter({
@@ -14,6 +14,21 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const userCredits = await ctx.db.user.findUnique({
+        where: {
+          id: ctx.user.userId!
+        },
+        select: {
+          credits: true
+        }
+      })
+      if(!userCredits) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found' })
+      
+      const fileCount = await checkCredits(input.githubUrl, input.githubToken);
+      if(fileCount > userCredits.credits) throw new TRPCError({ code: 'FORBIDDEN', message: 'Insufficient credits' })
+
+
+
       const project = await ctx.db.project.create({
         data: {
           githubUrl: input.githubUrl,
@@ -29,11 +44,22 @@ export const projectRouter = createTRPCRouter({
       try {
         await indexGithubRepo(project.id, input.githubUrl, input.githubToken);
         //await pollCommits(project.id); paused for now
+        await ctx.db.user.update({
+          where: {
+            id: ctx.user.userId!,
+          },
+          data: {
+            credits: {
+              decrement: fileCount,
+            },
+          },
+        })
       } catch (error) {
+        console.error("❌ CRASH INSIDE INDEXING WORKFLOW:", error);
         //  — delete project if error in indexing
         await ctx.db.project.delete({
           where: { id: project.id },
-        });
+        }).catch((err) => console.error("Failed to cleanup project row:", err));;
 
         throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
@@ -157,5 +183,26 @@ export const projectRouter = createTRPCRouter({
           credits: true
         }
       })
+    }),
+
+    checkCredits: protectedProcedure.input(
+      z.object({
+        githubUrl: z.string(),
+        githubToken: z.string().optional(),
+      })
+    ).mutation(async ({ctx, input}) => {
+      const fileCount = await checkCredits(input.githubUrl, input.githubToken);
+      const myCredits = await ctx.db.user.findUnique({
+        where: {
+          id: ctx.user.userId!
+        },
+        select: {
+          credits: true
+        }
+      })
+      return {
+        fileCount,
+        credits: myCredits?.credits ?? 0
+      }
     })
 });
