@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { 
   Dialog, 
   DialogContent, 
@@ -19,11 +19,13 @@ const InviteButton = () => {
   const { projectId } = useProject()
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [inviteUrl, setInviteUrl] = useState("")
 
-  // 🚀 Construct the unique invite link safely on the client side
-  const inviteUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/join/${projectId}` 
-    : ''
+ useEffect(() => {
+    if (typeof window !== "undefined") {
+      setInviteUrl(`${window.location.origin}/join/${projectId}`)
+    }
+  }, [projectId])
 
   const handleCopy = async () => {
     if (!inviteUrl) return
