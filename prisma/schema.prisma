@@ -25,10 +25,10 @@ model User  {
     
     emailAddress String @unique
     credits Int @default(150)
+    stripeTransactions StripeTransaction[]
 
     userToProjects UserToProject[]
 }
-
 
 model Project {
     id String @id @default(cuid())
@@ -111,5 +111,17 @@ model Questions {
     userId String
     user User @relation(fields: [userId],references: [id])
 
+
+}
+
+model StripeTransaction {
+    id String @id @default(cuid()) 
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    userId String 
+    user User @relation(fields: [userId], references: [id])
+    
+    credits Int
 
 }
