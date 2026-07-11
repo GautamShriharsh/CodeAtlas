@@ -3,7 +3,7 @@
 export default function MeetingsPage() {
   return (
     <div>
-      <h1>Meetings</h1>
+      <h1>Meetings Coming Soon...</h1>
     </div>
   );
 }

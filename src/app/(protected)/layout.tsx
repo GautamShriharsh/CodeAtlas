@@ -12,13 +12,12 @@ const SideBarLayout = ({ children }: Props) => {
     <SidebarProvider>
       <AppSideBar />
 
-      
-      <main className="m-2 flex flex-1 flex-col overflow-hidden">
-        {/* Top Navbar Header Component Container */}
+      <main className="flex flex-1 flex-col overflow-hidden p-2 pl-0">
+        {/* Top Navbar Header Container */}
         <DashboardHeader />
 
-        
-        <div className="border-sidebar-border bg-sidebar flex-1 overflow-y-auto rounded-b-md border-x border-b p-4 shadow">
+        {/* Page Content Container Box */}
+        <div className="border-sidebar-border bg-sidebar flex-1 overflow-y-auto rounded-b-md border p-4 shadow">
           {children}
         </div>
       </main>
