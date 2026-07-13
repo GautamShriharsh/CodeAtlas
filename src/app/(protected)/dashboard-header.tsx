@@ -15,13 +15,14 @@ export const DashboardHeader = () => {
   const pathSegments = pathname.split("/").filter(Boolean);
   const activeProjectName = project ? project.name : "Select Project";
   const isBillingPage = pathSegments.includes("billing");
+  const isCreatePage = pathSegments.includes("create")
 
   return (
     <div className="flex items-center justify-between border-sidebar-border bg-sidebar border shadow rounded-t-md p-3 px-4">
       
-      {/* LEFT SIDE: Clean, Trimmed Breadcrumbs */}
+      {/* LEFT SIDE:  Breadcrumbs */}
       <div className="flex items-center gap-2 text-sm font-medium">
-        {project && !isBillingPage &&(
+        {project && !isBillingPage && !isCreatePage &&(
           <>
             <div className="flex items-center gap-1.5 text-sidebar-foreground/70">
               <Folder className="h-3.5 w-3.5 text-sidebar-foreground/40" />
@@ -34,7 +35,7 @@ export const DashboardHeader = () => {
         )}
         
        { !isBillingPage && 
-        <span className="font-semibold text-sidebar-foreground capitalize">
+        <span className="text-sidebar-foreground/70 capitalize">
           {pathSegments[pathSegments.length - 1] || "Dashboard"}
         </span>}
       </div>
@@ -46,7 +47,7 @@ export const DashboardHeader = () => {
           <div className="flex items-center gap-2 rounded-md border border-sidebar-border bg-background/40 px-3 py-1.5 text-xs font-medium text-sidebar-foreground/80 min-w-[140px] justify-center">
             <Coins className="h-3.5 w-3.5 text-sidebar-foreground/50" />
             
-            {/* 🚀 Dynamic Loader Check */}
+            {/* Dynamic Loader Check */}
             {isCreditLoading ? (
               <div className="flex items-center gap-1">
                 <Loader2 className="h-3 w-3 animate-spin text-sidebar-foreground/40" />
