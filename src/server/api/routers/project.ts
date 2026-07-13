@@ -92,13 +92,31 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      // await pollCommits(input.projectId).then().catch(console.error) paused for sometime
       const commits = await ctx.db.commit.findMany({
         where: {
           projectId: input.projectId!,
         },
       });
       return commits;
+    }),
+
+    syncCommits: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const result = await pollCommits(input.projectId);
+        return result;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to sync repository commits",
+          cause: error,
+        });
+      }
     }),
 
   saveAnswer: protectedProcedure

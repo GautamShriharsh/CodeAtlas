@@ -46,9 +46,9 @@ const CreatePage = () => {
         githubUrl: data.repoUrl,
         githubToken: data.githubToken
       }, {
-        onSuccess: (newProject) => {
+        onSuccess: async (newProject) => {
           toast.success('Project created successfully');
-          refetch();
+          await refetch();
           if (newProject?.id) {
             setProjectId(newProject.id);
           }

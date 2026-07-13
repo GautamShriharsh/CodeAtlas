@@ -24,10 +24,7 @@ function Dashboard() {
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-4 text-center">
-        {/* The loader inherits the text-cyan-400 color automatically via currentColor */}
         <FlippingCubeLoader />
-
-        {/* We keep the text muted-foreground so it doesn't conflict with the bright cyan */}
         <p className="text-muted-foreground animate-pulse text-sm">
           Loading workspace data...
         </p>
@@ -94,17 +91,17 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Cards Row */}
+    
       <div className="grid grid-cols-1 gap-4">
-        {/* 🚀 AskQuestionCard now takes up full horizontal layout space gracefully */}
+        
         <div className="w-full">
           <AskQuestionCard />
         </div>
       </div>
 
-      {/* Commit Log Full Width */}
-      {/* <div className="rounded-lg  p-4"><CommitLog /></div> */}
-      {/* paused for now */}
+      {/* Commit Log */}
+      <div className="rounded-lg  p-4"><CommitLog /></div>
+
     </div>
   );
 }
