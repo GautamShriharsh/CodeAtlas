@@ -15,17 +15,120 @@ type Props = {
   fileReferences: FileReference[]
 }
 
+const languageMap: Record<string, string> = {
+  // JavaScript / TypeScript
+  js: 'javascript',
+  jsx: 'jsx',
+  mjs: 'javascript',
+  cjs: 'javascript',
+  ts: 'typescript',
+  tsx: 'tsx',
+
+  // Python
+  py: 'python',
+
+  // Java / JVM
+  java: 'java',
+  kt: 'kotlin',
+  kts: 'kotlin',
+  scala: 'scala',
+  groovy: 'groovy',
+
+  // C / C++
+  c: 'c',
+  h: 'c',
+  cpp: 'cpp',
+  cxx: 'cpp',
+  cc: 'cpp',
+  hpp: 'cpp',
+  hh: 'cpp',
+  hxx: 'cpp',
+
+  // C#
+  cs: 'csharp',
+
+  // Go / Rust
+  go: 'go',
+  rs: 'rust',
+
+  // Apple
+  swift: 'swift',
+  m: 'objectivec',
+  mm: 'objectivec',
+
+  // Web
+  html: 'html',
+  htm: 'html',
+  css: 'css',
+  scss: 'scss',
+  sass: 'scss',
+  less: 'less',
+
+  // Data
+  json: 'json',
+  jsonc: 'json',
+  yaml: 'yaml',
+  yml: 'yaml',
+  toml: 'toml',
+  xml: 'xml',
+  csv: 'csv',
+
+  // Shell
+  sh: 'bash',
+  bash: 'bash',
+  zsh: 'bash',
+  fish: 'bash',
+
+  // Databases
+  sql: 'sql',
+
+  // Scripting
+  php: 'php',
+  rb: 'ruby',
+  pl: 'perl',
+  lua: 'lua',
+  r: 'r',
+
+  // Functional
+  ex: 'elixir',
+  exs: 'elixir',
+  erl: 'erlang',
+  fs: 'fsharp',
+  fsx: 'fsharp',
+  clj: 'clojure',
+
+  // Mobile
+  dart: 'dart',
+
+  // DevOps
+  dockerfile: 'docker',
+  tf: 'hcl',
+
+  // Markup
+  md: 'markdown',
+  mdx: 'mdx',
+  rst: 'markdown',
+
+  // GraphQL
+  gql: 'graphql',
+  graphql: 'graphql',
+
+  // Misc
+  ini: 'ini',
+  conf: 'ini',
+  txt: 'text',
+  log: 'text',
+}
+
+
 const languageFromFileName = (fileName: string) => {
-  if (fileName.endsWith('.ts')) return 'typescript'
-  if (fileName.endsWith('.tsx')) return 'tsx'
-  if (fileName.endsWith('.js')) return 'javascript'
-  if (fileName.endsWith('.jsx')) return 'jsx'
-  if (fileName.endsWith('.css')) return 'css'
-  if (fileName.endsWith('.json')) return 'json'
-  if (fileName.endsWith('.md')) return 'markdown'
-  if (fileName.endsWith('.html')) return 'html'
-  if (fileName.endsWith('.sh')) return 'bash'
-  return 'text'
+  const name = fileName.toLowerCase()
+
+  if (name.includes('dockerfile')) return 'docker'
+
+  const ext = name.split('.').pop() ?? ''
+
+  return languageMap[ext] ?? 'text'
 }
 
 // Shorten long paths: keep only the last 2 segments
