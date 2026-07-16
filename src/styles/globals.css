@@ -132,3 +132,28 @@
     @apply font-sans;
   }
 }
+
+
+.hero-dashboard {
+  -webkit-mask-image:
+    radial-gradient(circle at center, black 62%, transparent 100%),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 10%,
+      black 78%,
+      transparent 100%
+    );
+  mask-image:
+    radial-gradient(circle at center, black 62%, transparent 100%),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 10%,
+      black 78%,
+      transparent 100%
+    );
+
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}

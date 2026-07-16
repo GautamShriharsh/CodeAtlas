@@ -131,6 +131,7 @@ const languageFromFileName = (fileName: string) => {
   return languageMap[ext] ?? 'text'
 }
 
+
 // Shorten long paths: keep only the last 2 segments
 // "src/app/(protected)/dashboard/page.tsx" → "dashboard/page.tsx"
 const shortName = (fileName: string) => {
@@ -145,14 +146,13 @@ const CodeReferences = ({ fileReferences }: Props) => {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-3">
-      {/* Scrollable tab bar — no wrapping, horizontal scroll on overflow */}
       <div className="overflow-x-auto pb-1">
         <TabsList className="inline-flex h-auto w-max gap-1 bg-muted/80 p-1">
           {fileReferences.map((file) => (
             <TabsTrigger
               key={file.fileName}
               value={file.fileName}
-              title={file.fileName}        /* full path on hover */
+              title={file.fileName}       
               className="whitespace-nowrap px-3 py-1.5 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm hover:cursor-pointer"
             >
               {shortName(file.fileName)}
