@@ -181,8 +181,8 @@ function TreeRow({ item }: any) {
 
 export default function HeroCodebaseMockupPreview() {
   return (
-    <div className="mt-15 mb-15 w-full bg-black p-8">
-      <div className="relative mx-auto max-w-[1400px] px-6 lg:px-10">
+    <div className="mt-15 mb-15 w-full bg-black px-4 py-8 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-[1400px] px-2 sm:px-6 lg:px-10">
         <p
           className="mb-8 text-center text-xs font-medium text-neutral-500"
           style={{ letterSpacing: "0.35em" }}
@@ -212,8 +212,9 @@ export default function HeroCodebaseMockupPreview() {
               </div>
             </div>
 
+
             {/* LEFT PANEL */}
-            <div className="p-8 lg:p-10">
+            <div className="p-5 sm:p-6 lg:p-10">
               <h3 className="text-lg font-semibold tracking-tight text-neutral-100">
                 Repository
               </h3>
@@ -223,14 +224,14 @@ export default function HeroCodebaseMockupPreview() {
               </div>
 
               <div className="mt-5 border-t border-neutral-800/70 pt-5">
-                <div className="grid grid-cols-5 gap-5">
-                  <div className="col-span-2 border-r border-neutral-900 pr-4">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+                  <div className="col-span-1 md:col-span-2 md:border-r md:border-neutral-900 md:pr-4">
                     {TREE.map((item, i) => (
                       <TreeRow key={i} item={item} />
                     ))}
                   </div>
 
-                  <div className="col-span-3">
+                  <div className="col-span-1 md:col-span-3">
                     <p className="mb-3 text-sm font-medium text-neutral-300">
                       Git Commits
                     </p>
@@ -250,7 +251,7 @@ export default function HeroCodebaseMockupPreview() {
                       />
                       <div className="space-y-4">
                         {COMMITS.map((commit) => (
-                          <div key={commit.id} className="relative flex gap-3">
+                          <div key={commit.id} className="relative flex gap-2">
                             <span
                               className={`relative z-10 mt-1.5 h-3.5 w-3.5 shrink-0 rounded-full ring-4 ring-neutral-950 ${
                                 commit.branch === "dev"
@@ -258,7 +259,7 @@ export default function HeroCodebaseMockupPreview() {
                                   : "bg-blue-400"
                               }`}
                             />
-                            <div className="flex-1 rounded-xl border border-neutral-800/70 bg-neutral-900/40 p-3.5">
+                            <div className="flex-1 rounded-xl border border-neutral-800/70 bg-neutral-900/40 p-3">
                               <div className="mb-1.5 flex items-center justify-between">
                                 <div className="flex items-center gap-1.5 text-xs">
                                   <span
@@ -278,10 +279,10 @@ export default function HeroCodebaseMockupPreview() {
                                   {commit.id}
                                 </span>
                               </div>
-                              <p className="text-sm font-medium text-neutral-200">
+                              <p className="line-clamp-2 break-words text-sm font-medium leading-snug text-neutral-200">
                                 {commit.title}
                               </p>
-                              <p className="mt-1 text-xs leading-relaxed text-neutral-500">
+                              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-neutral-500">
                                 {commit.desc}
                               </p>
                             </div>
@@ -322,7 +323,7 @@ export default function HeroCodebaseMockupPreview() {
             </div>
 
             {/* RIGHT PANEL */}
-            <div className="p-8 lg:p-10">
+            <div className="p-5 sm:p-6 lg:p-10">
               <h3 className="text-lg font-semibold tracking-tight text-neutral-100">
                 AI Understanding
               </h3>
@@ -334,9 +335,9 @@ export default function HeroCodebaseMockupPreview() {
               </div>
 
               <div className="mt-5 flex justify-end">
-                <div className="flex max-w-[65%] items-center gap-3 rounded-2xl border border-neutral-800/70 bg-black/40 px-4 py-3">
+                <div className="flex w-full sm:w-auto sm:max-w-[80%] md:max-w-[65%] items-center justify-between gap-4 rounded-2xl border border-neutral-800/70 bg-black/40 px-4 py-3">
                   <span className="text-sm text-neutral-400">
-                    Explain the authentication flow
+                    Explain the authentication flow.
                   </span>
 
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-500/20">
@@ -370,7 +371,7 @@ export default function HeroCodebaseMockupPreview() {
               <p className="mt-6 mb-3 text-sm font-medium text-neutral-300">
                 Codebase Knowledge
               </p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {KNOWLEDGE.map((k) => {
                   const styles = COLOR_STYLES[k.color];
                   const Icon = k.icon;
