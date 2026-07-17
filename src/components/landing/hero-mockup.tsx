@@ -146,7 +146,7 @@ function TreeRow({ item }: any) {
     return (
       <div className="flex items-center gap-2 pb-3 pl-2 text-sm text-neutral-300">
         <FolderGit2 className="h-4 w-4 text-neutral-500" />
-        {item.label}
+        <span className="truncate">{item.label}</span>
       </div>
     );
   }
@@ -154,17 +154,17 @@ function TreeRow({ item }: any) {
   if (item.type === "file") {
     return (
       <div
-        className={`flex items-center gap-1.5 py-1 text-sm text-neutral-500 ${indent}`}
+        className={`flex min-w-0 items-center gap-1.5 py-1 text-sm text-neutral-500 ${indent}`}
       >
         <File className="h-3.5 w-3.5 text-neutral-600" />
-        {item.label}
+        <span className="truncate">{item.label}</span>
       </div>
     );
   }
 
   return (
     <div
-      className={`flex items-center gap-1.5 py-1 text-sm text-neutral-400 ${indent}`}
+      className={`flex min-w-0 items-center gap-1.5 py-1 text-sm text-neutral-400 ${indent}`}
     >
       {item.depth === 0 ? (
         item.open ? (
@@ -174,7 +174,7 @@ function TreeRow({ item }: any) {
         )
       ) : null}
       <Folder className="h-3.5 w-3.5 text-neutral-500" />
-      {item.label}
+      <span className="truncate">{item.label}</span>
     </div>
   );
 }
@@ -212,9 +212,8 @@ export default function HeroCodebaseMockupPreview() {
               </div>
             </div>
 
-
             {/* LEFT PANEL */}
-            <div className="p-5 sm:p-6 lg:p-10">
+            <div className="@container p-5 md:p-8 xl:p-10">
               <h3 className="text-lg font-semibold tracking-tight text-neutral-100">
                 Repository
               </h3>
@@ -224,14 +223,14 @@ export default function HeroCodebaseMockupPreview() {
               </div>
 
               <div className="mt-5 border-t border-neutral-800/70 pt-5">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
-                  <div className="col-span-1 md:col-span-2 md:border-r md:border-neutral-900 md:pr-4">
+                <div className="grid grid-cols-1 gap-6 @[480px]:grid-cols-5">
+                  <div className="col-span-1 @[480px]:col-span-2 @[480px]:border-r @[480px]:border-neutral-900 @[480px]:pr-4">
                     {TREE.map((item, i) => (
                       <TreeRow key={i} item={item} />
                     ))}
                   </div>
 
-                  <div className="col-span-1 md:col-span-3">
+                  <div className="col-span-1 @[480px]:col-span-3">
                     <p className="mb-3 text-sm font-medium text-neutral-300">
                       Git Commits
                     </p>
@@ -279,7 +278,7 @@ export default function HeroCodebaseMockupPreview() {
                                   {commit.id}
                                 </span>
                               </div>
-                              <p className="line-clamp-2 break-words text-sm font-medium leading-snug text-neutral-200">
+                              <p className="line-clamp-2 text-sm leading-snug font-medium break-words text-neutral-200">
                                 {commit.title}
                               </p>
                               <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-neutral-500">
@@ -323,7 +322,7 @@ export default function HeroCodebaseMockupPreview() {
             </div>
 
             {/* RIGHT PANEL */}
-            <div className="p-5 sm:p-6 lg:p-10">
+            <div className="@container p-5 md:p-8 xl:p-10">
               <h3 className="text-lg font-semibold tracking-tight text-neutral-100">
                 AI Understanding
               </h3>
@@ -335,7 +334,7 @@ export default function HeroCodebaseMockupPreview() {
               </div>
 
               <div className="mt-5 flex justify-end">
-                <div className="flex w-full sm:w-auto sm:max-w-[80%] md:max-w-[65%] items-center justify-between gap-4 rounded-2xl border border-neutral-800/70 bg-black/40 px-4 py-3">
+                <div className="flex w-full items-center justify-between gap-4 rounded-2xl border border-neutral-800/70 bg-black/40 px-4 py-3 sm:max-w-[85%] lg:max-w-[65%]">
                   <span className="text-sm text-neutral-400">
                     Explain the authentication flow.
                   </span>
@@ -371,7 +370,7 @@ export default function HeroCodebaseMockupPreview() {
               <p className="mt-6 mb-3 text-sm font-medium text-neutral-300">
                 Codebase Knowledge
               </p>
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 @[380px]:grid-cols-3">
                 {KNOWLEDGE.map((k) => {
                   const styles = COLOR_STYLES[k.color];
                   const Icon = k.icon;
@@ -381,10 +380,10 @@ export default function HeroCodebaseMockupPreview() {
                       className={`rounded-lg border ${styles.border} ${styles.bg} p-3`}
                     >
                       <Icon className={`h-4 w-4 ${styles.icon}`} />
-                      <p className="mt-2 text-sm font-medium text-neutral-200">
+                      <p className="mt-2 text-xs @[380px]:text-sm font-medium leading-tight text-neutral-200">
                         {k.label}
                       </p>
-                      <p className="text-xs text-neutral-500">{k.value}</p>
+                      <p className="text-[11px] @[380px]:text-xs text-neutral-500">{k.value}</p>
                     </div>
                   );
                 })}
