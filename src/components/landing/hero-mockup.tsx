@@ -181,7 +181,34 @@ function TreeRow({ item }: any) {
 
 export default function HeroCodebaseMockupPreview() {
   return (
-    <div className="mt-15 mb-15 w-full bg-black px-4 py-8 sm:px-6 lg:px-8">
+    <div className="relative z-0 mt-15 w-full overflow-hidden bg-black px-4 pt-12 pb-24 sm:px-6 sm:pb-32 lg:px-8">
+      
+      {/* ---------------------------------------------------- */}
+      {/* LINEAR-STYLE STUDIO BACKGROUND                         */}
+      {/* ---------------------------------------------------- */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        {/* Top mask layer */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-b from-black via-black via-[25%] to-transparent" />
+        
+        {/* Vignette layer that dims glow explicitly toward the outer corners */}
+        <div className="absolute inset-0 z-20 bg-[radial-gradient(circle_at_center,transparent_60%,rgba(0,0,0,0.35)_100%)]" />
+        
+     {/* LEFT SIDE: Unevenly spread radial drop-off */}
+{/* LEFT SIDE: Seamlessly blended matching studio drop-off */}
+<div className="absolute bottom-[-100px] left-[10%] w-[450px] h-[250px] z-20 bg-[radial-gradient(ellipse_at_bottom,rgba(35,39,46,0.45)_0%,transparent_85%)] pointer-events-none filter blur-sm" />
+
+{/* RIGHT SIDE: Seamlessly blended matching studio drop-off */}
+<div className="absolute bottom-[-100px] right-[10%] w-[450px] h-[250px] z-20 bg-[radial-gradient(ellipse_at_bottom,rgba(35,39,46,0.45)_0%,transparent_85%)] pointer-events-none filter blur-sm" />
+        <img
+          src="/grey-gradient.jpg"
+          alt="Background gradient backdrop"
+          className="absolute inset-0 h-full w-full scale-[2.8] translate-y-[12%] object-cover opacity-65 origin-center"
+        />
+
+        
+      </div>
+      {/* ---------------------------------------------------- */}
+
       <div className="relative mx-auto max-w-[1400px] px-2 sm:px-6 lg:px-10">
         <p
           className="mb-8 text-center text-xs font-medium text-neutral-500"
@@ -191,16 +218,49 @@ export default function HeroCodebaseMockupPreview() {
         </p>
 
         <div className="relative">
-          {/* <div className="absolute left-1/2 top-1/2 z-20 hidden md:block" style={{ transform: "translate(-50%, -50%)" }}>
-            <div
-              className="relative flex h-14 w-14 items-center justify-center rounded-xl border border-white/20 bg-black"
-              style={{ transform: "rotate(45deg)", boxShadow: "0 0 40px rgba(255,255,255,0.25)" }}
-            >
-              <div className="h-5 w-5 rounded-sm bg-white" style={{ transform: "rotate(-45deg)", boxShadow: "0 0 20px rgba(255,255,255,0.8)" }} />
-            </div>
-          </div> */}
+          {/* ---------------------------------------------------- */}
+          {/* 3D STUDIO FLOOR OCCLUSION SHADOWS                    */}
+          {/* ---------------------------------------------------- */}
+          {/* Tight contact shadow directly under the dashboard base */}
+          {/* <div className="absolute bottom-0 left-[1%] right-[1%] -z-10 h-2 bg-black/90 blur-[2px] pointer-events-none" />
+           */}
+           {/* Bottom Left Corner */}
+<div
+  className="
+    pointer-events-none
+    absolute
+    -bottom-2
+    left-5
+    h-10
+    w-32
+    rounded-full
+    bg-black/35
+    blur-xl
+    -z-10
+  "
+/>
 
-          <div className="relative grid grid-cols-1 overflow-hidden rounded-[30px] border border-neutral-800/60 bg-neutral-950/70 backdrop-blur-xl md:grid-cols-2">
+{/* Bottom Right Corner */}
+<div
+  className="
+    pointer-events-none
+    absolute
+    -bottom-2
+    right-5
+    h-10
+    w-32
+    rounded-full
+    bg-black/35
+    blur-xl
+    -z-10
+  "
+/>
+          {/* Soft ambient light bounce spreading further down the floor plane */}
+          {/* <div className="absolute bottom-[-6px] left-[3%] right-[3%] -z-10 h-6 bg-black/50 blur-md pointer-events-none" /> */}
+          {/* ---------------------------------------------------- */}
+
+          {/* Changed corner radius to rounded-xl for a sleeker, desktop window aesthetic */}
+          <div className="relative grid grid-cols-1 overflow-hidden rounded-xl border border-neutral-800/60 bg-neutral-950/70 backdrop-blur-xl md:grid-cols-2">
             {/* Divider */}
             <div className="pointer-events-none absolute inset-y-0 left-1/2 z-20 hidden -translate-x-1/2 md:block">
               <div className="relative h-full w-px bg-neutral-800">
@@ -402,11 +462,6 @@ export default function HeroCodebaseMockupPreview() {
               </div>
             </div>
           </div>
-
-          <div
-            aria-hidden="true"
-            className="mx-auto -mt-6 h-16 w-[85%] rounded-full bg-white/5 blur-2xl"
-          />
         </div>
       </div>
     </div>

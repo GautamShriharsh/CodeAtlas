@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 import { Reveal } from "./motion/reveal";
@@ -10,73 +9,49 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative overflow-hidden px-5 pt-40 pb-0 sm:px-8 sm:pt-48"
+      className="relative overflow-hidden px-6 pt-40 pb-0 sm:px-12 sm:pt-48 md:px-16 lg:px-24"
     >
       {/* Background */}
       <div className="absolute inset-0 -z-30">
-        <div className="absolute top-24 left-1/2 h-[700px] w-[1200px] -translate-x-1/2 rounded-full bg-neutral-600/10 blur-[180px]" />
+        <div className="absolute top-24 left-1/4 h-[700px] w-[1200px] rounded-full bg-neutral-600/5 blur-[180px]" />
       </div>
 
-      <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-        {/* <Reveal className="mb-7" y={16}>
-          <div className="inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-xs text-neutral-400 shadow-2xl backdrop-blur-md">
-            <span className="h-1.5 w-1.5 rounded-full bg-neutral-300" />
-            Introducing CodeAtlas
-          </div>
-        </Reveal> */}
-
+      {/* Primary Left-Aligned Content Container */}
+      <div className="flex w-full flex-col items-start text-left">
         <Reveal delay={0.50}>
-          <h1 className="max-w-5xl text-5xl font-semibold tracking-tight text-neutral-100 sm:text-6xl lg:text-8xl lg:leading-[0.98]">
+          {/* Sightly increased typography footprint to text-7xl for better balanced emphasis */}
+          <h1 className="text-5xl font-semibold tracking-tight text-neutral-100 sm:text-6xl lg:text-7xl lg:leading-[1.08]">
             Map your codebase.
             <br />
             <span className="text-neutral-500">Summarize every commit.</span>
           </h1>
         </Reveal>
 
-        <Reveal delay={0.70}>
-          <p className="mt-7 max-w-2xl text-base leading-7 text-neutral-400 sm:text-lg">
-            CodeAtlas transforms messy repository logic into clean, atomic AI
-            summaries and lets your team instantly search, understand, and
-            navigate your entire workspace.
-          </p>
-        </Reveal>
+        {/* Uses items-end on desktop grid matching so the link stays pinned to the far right baseline */}
+        <div className="mt-8 flex w-full flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-12">
+          <div className="max-w-2xl">
+            <Reveal delay={0.70}>
+              <p className="text-sm leading-relaxed text-neutral-400 sm:text-base">
+                CodeAtlas transforms messy repository logic into clean, atomic AI
+                summaries and lets your team instantly search, understand, and
+                navigate your entire workspace.
+              </p>
+            </Reveal>
+          </div>
 
-        <Reveal delay={0.24}>
-          <Button href="/dashboard" className="group mt-9 gap-2">
-            Launch Dashboard
-            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-          </Button>
-        </Reveal>
+          <div className="shrink-0 pb-1 mr-3">
+            <Reveal delay={1.84}>
+              <Button 
+                href="/dashboard" 
+                className="group flex items-center gap-1.5 border-none bg-transparent p-0 text-sm font-medium text-neutral-400 shadow-none outline-none transition-colors duration-200 hover:bg-transparent hover:text-neutral-200"
+              >
+                Launch Dashboard
+                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+              </Button>
+            </Reveal>
+          </div>
+        </div>
       </div>
-{/* 
-      <motion.div
-        initial={{ opacity: 0, y: 40, scale: 0.98 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{
-          duration: 0.9,
-          delay: 0.2,
-          ease: [0.16, 1, 0.3, 1],
-        }}
-        className="relative mt-10 flex justify-center"
-      > */}
-        {/* Background atmosphere */}
-        {/* <div className="absolute inset-0 -z-20 flex items-center justify-center">
-          <div className="h-[650px] w-[1400px] rounded-full bg-gradient-to-b from-neutral-700/12 via-neutral-800/6 to-transparent blur-[180px]" />
-        </div> */}
-
-        {/* subtle floor shadow */}
-        {/* <div className="absolute bottom-0 left-1/2 -z-10 h-28 w-[75%] -translate-x-1/2 rounded-full bg-black/60 blur-3xl" /> */}
-
-        {/* <img
-          src="/hero-final1.png"
-          alt="CodeAtlas Dashboard"
-          className="hero-dashboard w-[92vw] max-w-[1550px] object-cover"
-          style={{
-            transform: "perspective(2200px) rotateX(6deg) scale(1.02)",
-          }}
-        />
-      </motion.div> */}
     </section>
   );
 }
